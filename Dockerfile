@@ -22,16 +22,21 @@ RUN pip3 install tqdm stanza tensorboardX
 #build and install the Matterport3D sim
 RUN apt-get install -y --no-install-recommends libjsoncpp-dev libepoxy-dev libglm-dev libosmesa6 libosmesa6-dev libglew-dev libopencv-dev
 
-RUN git clone --recursive https://github.com/jhughes50/CLIP-ViL  && cd CLIP-ViL/CLIP-ViL-VLN && mkdir build && cd build && cmake -DOSMESA_RENDERING=ON .. && make
-
-EXPOSE 8381
+#RUN mkdir -p data
 
 ARG GID=1000
 ARG UID=1000
-RUN addgroup --gid $GID jason 
-RUN useradd --system --create-home --shell /bin/bash --groups sudo -p "$(openssl passwd -1 jason)" --uid $UID --gid $GID jason
-USER jason
+env USER jason
+RUN addgroup --gid $GID $USER 
+RUN useradd --system --create-home --shell /bin/bash --groups sudo -p "$(openssl passwd -1 ${USER})" --uid $UID --gid $GID $USER
 WORKDIR /home/vla-docker/
 
-#RUN cd VLA-Nav/CLIP-ViL/CLIP-ViL-VLN && mkdir build && cd build
-#RUN cmake -DEGL_RENDERING=ON .. && make -j8
+#ADD requirements.txt /home/vla-docker/
+
+RUN mkdir -p /home/vla-docker
+RUN cd /home/vla-docker && git clone --recursive https://github.com/jhughes50/CLIP-ViL && chown jason CLIP-ViL && cd CLIP-ViL/CLIP-ViL-VLN && mkdir build && cd build && cmake -DOSMESA_RENDERING=ON .. && make
+EXPOSE 8381
+RUN cd /home/vla-docker && mkdir -p data && chown $USER data
+
+USER $USER
+WORKDIR /home/vla-docker
