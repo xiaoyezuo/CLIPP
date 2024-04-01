@@ -6,7 +6,7 @@ ARG DEBIAN_FRONTEND=noninteractive
 RUN apt-get update
 # system depends
 RUN apt-get install -y --no-install-recommends gcc cmake
-RUN apt-get install -y --no-install-recommends python3-pip git python3-dev python3-opencv libglib2.0.0 wget python3-pybind11
+RUN apt-get install -y --no-install-recommends python3-pip git python3-dev python3-opencv libglib2.0.0 wget python3-pybind11 vim
 
 #RUN python3 -m pip intsall --upgrade pip
 
@@ -28,13 +28,13 @@ ARG GID=1000
 ARG UID=1000
 env USER jason
 RUN addgroup --gid $GID $USER 
-RUN useradd --system --create-home --shell /bin/bash --groups sudo -p "$(openssl passwd -1 ${USER})" --uid $UID --gid $GID $USER
+RUN useradd --system --create-home --shell /bin/bash --groups sudo -p "$(openssl passwd -1 jason)" --uid $UID --gid $GID $USER
 WORKDIR /home/vla-docker/
 
 #ADD requirements.txt /home/vla-docker/
 
 RUN mkdir -p /home/vla-docker
-RUN cd /home/vla-docker && git clone --recursive https://github.com/jhughes50/CLIP-ViL && chown jason CLIP-ViL && cd CLIP-ViL/CLIP-ViL-VLN && mkdir build && cd build && cmake -DOSMESA_RENDERING=ON .. && make
+RUN cd /home/vla-docker && git clone --recursive https://github.com/jhughes50/CLIP-ViL && chown jason CLIP-ViL && cd CLIP-ViL/CLIP-ViL-VLN && mkdir build && cd build && cmake -DOSMESA_RENDERING=ON .. && make -j8
 EXPOSE 8381
 RUN cd /home/vla-docker && mkdir -p data && chown $USER data
 
