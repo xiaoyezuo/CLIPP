@@ -1,0 +1,3 @@
+[submodule "CLIP-ViL"]
+	path = CLIP-ViL
+	url = https://github.com/jhughes50/CLIP-ViL
