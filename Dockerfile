@@ -16,6 +16,13 @@ RUN pip3 install torch torchvision torchaudio -f https://download.pytorch.org/wh
 
 RUN pip3 install jupyterlab notebook
 
+# install conda
+ENV CONDA_DIR /opt/conda
+RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ~/miniconda.sh && /bin/bash ~/miniconda.sh -b -p /opt/conda
+ENV PATH=$CONDA_DIR/bin:$PATH
+
+# habitat conda install
+RUN conda create -n habitat python=3.9 cmake=3.14.0 && conda init bash && conda activate habitat && conda install habitat-sim headless -c conda-forge -c aihabitat
 
 #install CLIP-ViL dependencies
 RUN pip3 install tqdm stanza tensorboardX openai-clip
