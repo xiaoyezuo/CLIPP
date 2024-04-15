@@ -23,3 +23,4 @@ class PoseDecoder(nn.Module):
         out = F.relu(self.layer1_(x))
         out = F.relu(self.layer2_(out))
         out = F.relu(self.layer3_(out))
+        return out
