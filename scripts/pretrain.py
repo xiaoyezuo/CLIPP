@@ -13,6 +13,7 @@ sys.path.append(PROJECT_ROOT)
 
 from lib.pose_extractor import PoseExtractor
 from lib.pose_encoder import PoseEncoder
+from lib.pose_decoder import PoseDecoder
 
 PATH = "/raid0/docker-raid/jasonah/VLA-Nav-Data/rxr-data/rxr_train_guide.jsonl.gz"
 
