@@ -17,9 +17,9 @@ RUN pip3 install jupyterlab notebook
 # Add user
 ARG GID=1000
 ARG UID=1000
-env USER jasonah
-RUN addgroup --gid $GID jasonah 
-RUN useradd --system --create-home --shell /bin/bash --groups sudo -p "$(openssl passwd -1 jasonah)" --uid $UID --gid $GID jasonah
+ENV USER jasonah
+RUN addgroup --gid $GID $USER 
+RUN useradd --system --create-home --shell /bin/bash --groups sudo -p "$(openssl passwd -1 ${USER})" --uid $UID --gid $GID $USER
 WORKDIR /home/$USER
 
 # setup conda
