@@ -11,12 +11,14 @@ import sys
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__),os.pardir))
 sys.path.append(PROJECT_ROOT)
 
-
 from lib.pose_extractor import PoseExtractor
 from lib.pose_encoder import PoseEncoder
 
+PATH = "/raid0/docker-raid/jasonah/VLA-Nav-Data/rxr-data/rxr_train_guide.jsonl.gz"
+
 def main():
-    pass
+    pe = PoseExtractor(PATH)
+    
 
 if __name__ == "__main__":
     main()
