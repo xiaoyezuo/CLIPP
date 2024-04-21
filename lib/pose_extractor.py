@@ -23,6 +23,36 @@ class Matcher:
         return poses[self.uids_]
 
 
+class Interpolator:
+
+    def __init__(self, output_dim):
+        assert output_dim % 2 == 0, "[Interpolator] output dimension must be even"
+        assert output_sim % 3 == 0, "[Interpolator] output dimension must be a multiple of 3"
+        self.out_dim_ = output_dim
+
+
+    def interpolate(self, poses):        
+        out_poses = np.empty((3, self.out_dim_))
+        num_poses = len(poses)
+
+        if num_poses == 2:
+            out_poses = self.subinterpolate(poses[0], poses[1], self.out_dim_)
+        elif num_poses == 3:
+            split = self.out_dim_/2
+            out_poses[0:split] = self.subinterpolate(poses[0], poses[1], split)
+            out_poses[split:-1] = self.subinterpolate(poses[1], poses[2], split)
+        else:
+            split = self.out_dim // (num_poses-2)
+            for i in range(num_poses-1):
+                out_pose[split*i:split*(i+1)] = self.subinterpolate(poses[i],poses[i+1],split)
+
+        return out_poses
+
+
+    def subinterpolate(self, start, end, dim):
+        return np.linspace(start, end, dim)
+
+
 class PoseExtractor:
 
     def __init__(self, path):
@@ -51,6 +81,16 @@ class PoseExtractor:
             print("[PoseExtractor] guide loaded")        
 
 
+    def interpolate(self, poses, ouput_dim=96):
+        out_poses = np.empty((3,output_dim))
+        out_poses[0] = poses[0]
+        out_poses[-1] = poses[-1]
+
+        num_poses = len(poses)
+
+
+
+
     def get_path_poses(self, pose_path):
         pose_trace = np.load(pose_path)
         poses = pose_trace["extrinsic_matrix"][:,:-1,-1]
@@ -66,7 +106,7 @@ class PoseExtractor:
         assert len(self.train_guide_) > 0, "[PoseExtractor] Training Guide is not loaded."
 
         for guide in self.train_guide_:
-            print(guide)
+            #print(guide)
             instruction_id = guide["instruction_id"]
             pose_path = self.generic_path_+ \
                 "pose_traces/rxr_train/{:06}_guide_pose_trace.npz".format(instruction_id)
