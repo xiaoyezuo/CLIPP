@@ -28,7 +28,7 @@ class Interpolator:
     def __init__(self, output_dim):
         assert output_dim % 2 == 0, "[Interpolator] output dimension must be even"
         assert output_sim % 3 == 0, "[Interpolator] output dimension must be a multiple of 3"
-        self.out_dim_ = output_dim
+        self.out_dim_ = output_dim / 3
 
 
     def interpolate(self, poses):        
@@ -46,7 +46,7 @@ class Interpolator:
             for i in range(num_poses-1):
                 out_pose[split*i:split*(i+1)] = self.subinterpolate(poses[i],poses[i+1],split)
 
-        return out_poses
+        return out_poses.flatten()
 
 
     def subinterpolate(self, start, end, dim):
@@ -55,13 +55,14 @@ class Interpolator:
 
 class PoseExtractor:
 
-    def __init__(self, path):
+    def __init__(self, path, out_dim=96):
 
         self.pose_ = None
         self.train_guide_ = list()
         self.generic_path_ = path.split("rxr_train")[0]
 
         self.matcher_ = Matcher()
+        self.interpolator_ = Interpolator(out_dim)
 
         self.load(path)
 
@@ -81,16 +82,6 @@ class PoseExtractor:
             print("[PoseExtractor] guide loaded")        
 
 
-    def interpolate(self, poses, ouput_dim=96):
-        out_poses = np.empty((3,output_dim))
-        out_poses[0] = poses[0]
-        out_poses[-1] = poses[-1]
-
-        num_poses = len(poses)
-
-
-
-
     def get_path_poses(self, pose_path):
         pose_trace = np.load(pose_path)
         poses = pose_trace["extrinsic_matrix"][:,:-1,-1]
@@ -100,17 +91,17 @@ class PoseExtractor:
         return unique_poses
 
 
-    def path_from_guide(self):
+    def path_from_guide(self, idx):
         # here we can get the path of UIDs from the train guide
         # but then where to we get the actual poses of the points on the path.
         assert len(self.train_guide_) > 0, "[PoseExtractor] Training Guide is not loaded."
 
-        for guide in self.train_guide_:
-            #print(guide)
-            instruction_id = guide["instruction_id"]
-            pose_path = self.generic_path_+ \
-                "pose_traces/rxr_train/{:06}_guide_pose_trace.npz".format(instruction_id)
+        guide = self.train_guide_[idx]:
+        
+        instruction_id = guide["instruction_id"]
+        pose_path = self.generic_path_+ \
+            "pose_traces/rxr_train/{:06}_guide_pose_trace.npz".format(instruction_id)
             
-            unique_poses = self.get_path_poses(pose_path)
-            #break
+        unique_poses = self.get_path_poses(pose_path)
+        return unique_poses
 
