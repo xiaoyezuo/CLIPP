@@ -27,24 +27,29 @@ class Interpolator:
 
     def __init__(self, output_dim):
         assert output_dim % 2 == 0, "[Interpolator] output dimension must be even"
-        assert output_sim % 3 == 0, "[Interpolator] output dimension must be a multiple of 3"
-        self.out_dim_ = output_dim / 3
+        assert output_dim % 3 == 0, "[Interpolator] output dimension must be a multiple of 3"
+        self.out_dim_ = int(output_dim / 3)
 
 
     def interpolate(self, poses):        
-        out_poses = np.empty((3, self.out_dim_))
+        out_poses = np.empty((self.out_dim_, 3))
         num_poses = len(poses)
-
+        
         if num_poses == 2:
             out_poses = self.subinterpolate(poses[0], poses[1], self.out_dim_)
         elif num_poses == 3:
-            split = self.out_dim_/2
+            split = self.out_dim_//2
             out_poses[0:split] = self.subinterpolate(poses[0], poses[1], split)
-            out_poses[split:-1] = self.subinterpolate(poses[1], poses[2], split)
+            out_poses[split:-1] = self.subinterpolate(poses[1], poses[2], split)[1:,:]
         else:
-            split = self.out_dim // (num_poses-2)
+            remainder = self.out_dim_ % (num_poses-1)
+            split = self.out_dim_ // (num_poses-1)
+            
             for i in range(num_poses-1):
-                out_pose[split*i:split*(i+1)] = self.subinterpolate(poses[i],poses[i+1],split)
+                if remainder != 0 and i+1 == num_poses-1:
+                    out_poses[split*i:,:] = self.subinterpolate(poses[i], poses[i+1],split+remainder)
+                else:
+                    out_poses[split*i:split*(i+1),:] = self.subinterpolate(poses[i],poses[i+1],split)
 
         return out_poses.flatten()
 
@@ -74,6 +79,9 @@ class PoseExtractor:
     def pose(self, p):
         self.pose_ = p
 
+    def interpolate(self, path):
+        return self.interpolator_.interpolate(path)
+
 
     def load(self, path):
         with gzip.open(path, 'r') as f:
@@ -96,7 +104,7 @@ class PoseExtractor:
         # but then where to we get the actual poses of the points on the path.
         assert len(self.train_guide_) > 0, "[PoseExtractor] Training Guide is not loaded."
 
-        guide = self.train_guide_[idx]:
+        guide = self.train_guide_[idx]
         
         instruction_id = guide["instruction_id"]
         pose_path = self.generic_path_+ \

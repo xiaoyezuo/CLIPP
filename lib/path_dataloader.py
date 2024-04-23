@@ -9,7 +9,7 @@ from torch.utils.data import Dataset
 from pose_extractor import PoseExtractor
 
 
-class PathDataset(Dataset, PoseExtractor):
+class PathDataLoader(Dataset, PoseExtractor):
 
     def __init__(self, path, interpolate=True, out_dim=96):
         # Inherit the pose extractor
