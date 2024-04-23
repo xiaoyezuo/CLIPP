@@ -17,7 +17,7 @@ import torch.nn.functional as F
 class PoseEncoder(nn.Module):
     # encode poses of path, by compressing them to out_dim
     def __init__(self, in_dim, hidden, out_dim):
-        super.__init__()
+        super().__init__()
         # layers
         self.layer1_ = nn.Linear(in_dim, hidden)
         self.layer2_ = nn.Linear(hidden, hidden)

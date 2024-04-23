@@ -35,7 +35,12 @@ class Interpolator:
         out_poses = np.empty((self.out_dim_, 3))
         num_poses = len(poses)
         
-        if num_poses == 2:
+        if num_poses == 0:
+            return None
+        elif num_poses == 1:
+            out_poses = np.ones((self.out_dim_, 3))
+            out_poses = poses * out_poses
+        elif num_poses == 2:
             out_poses = self.subinterpolate(poses[0], poses[1], self.out_dim_)
         elif num_poses == 3:
             split = self.out_dim_//2
@@ -91,9 +96,11 @@ class PoseExtractor:
 
 
     def get_path_poses(self, pose_path):
-        pose_trace = np.load(pose_path)
-        poses = pose_trace["extrinsic_matrix"][:,:-1,-1]
-        
+        try:
+            pose_trace = np.load(pose_path)
+            poses = pose_trace["extrinsic_matrix"][:,:-1,-1]
+        except FileNotFoundError:
+            return np.array([])
         self.matcher_.match(pose_trace["pano"])
         unique_poses = self.matcher_.poses_from_match(poses)
         return unique_poses

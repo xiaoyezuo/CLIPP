@@ -15,6 +15,7 @@ from lib.pose_extractor import PoseExtractor
 
 def main(path):
     pe = PoseExtractor(path)
+    print(len(pe.train_guide_))
     #path = pe.path_from_guide(23)
     path = np.array([[1,1,1],[2,2,2],[3,3,3],[4,4,4],[5,5,5],[6,6,6],[7,7,7]])
     path = pe.interpolate(path)
