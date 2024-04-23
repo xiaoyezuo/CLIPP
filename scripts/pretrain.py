@@ -20,8 +20,8 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-DATA_PATH = "/home/vla-docker/data/VLA-Nav-Data/rxr-data/rxr_train_guide.jsonl.gz"
-MODEL_PATH = "/home/vla-docker/models/"
+DATA_PATH = "/home/jasonah/data/VLA-Nav-Data/rxr-data/rxr_train_guide.jsonl.gz"
+MODEL_PATH = "/home/jasonah/models/"
 
 DEVICE = device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -52,11 +52,12 @@ def train(encoder, decoder, optimizer, dataloader, epochs):
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
-
+            
         print("[PRETRAIN] Saving epoch: %s with loss: %s" %(ep, loss))
         # save the model as each epoch
+        
         torch.save(encoder.state_dict(), MODEL_PATH+"encoder_epoch%s.pth" %ep)
-        torch.save(decoder.state_dict(), MODLE_PATH+"decoder_epoch%s.pth" %ep)
+        torch.save(decoder.state_dict(), MODEL_PATH+"decoder_epoch%s.pth" %ep)
     
 
 if __name__ == "__main__":

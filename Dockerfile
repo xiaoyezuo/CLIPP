@@ -26,7 +26,7 @@ WORKDIR /home/$USER
 COPY --from=miniconda /opt/conda /opt/conda
 RUN chown -R $USER: /opt/conda 
 # habitat conda install
-USER $USER
+#USER $USER
 RUN echo ". /opt/conda/etc/profile.d/conda.sh" >> ~/.bashrc && \
     echo "conda activate base" >> ~/.bashrc
 SHELL ["/bin/bash", "-c"]
@@ -35,5 +35,5 @@ RUN source /opt/conda/etc/profile.d/conda.sh && conda init bash && conda create 
 #install CLIP-ViL dependencies
 RUN pip3 install tqdm stanza tensorboardX openai-clip
 
-WORKDIR /home/vla-docker
+WORKDIR /home/$USER
 CMD ["bash"]
