@@ -21,8 +21,8 @@ class TextImagePathDataset(Dataset):
         self.text_toeknizer = AutoTokenizer.from_pretrained('bert-base-uncased')
         self.img_model = ViTModel.from_pretrained('google/vit-base-patch16-224-in21k')
         self.text_model = AutoModel.from_pretrained('bert-base-uncased')
-        self.linear1 = torch.nn.Linear(768, 512)
-        self.linear2 = torch.nn.Linear(768, 512)
+        # self.linear1 = torch.nn.Linear(768, 512)
+        # self.linear2 = torch.nn.Linear(768, 512)
 
     def __len__(self):
         return len(self.img_paths)
@@ -34,8 +34,8 @@ class TextImagePathDataset(Dataset):
         with torch.no_grad():
             outputs = self.text_model(**text_inputs)
             last_hidden_states = outputs.last_hidden_state
-            text_cls_features = last_hidden_states[:, 0, :]
-            text_embedding = self.linear2(text_cls_features)
+            text_embedding = last_hidden_states[:, 0, :]
+            # text_embedding = self.linear2(text_embedding)
 
         #process image 
         image_paths = self.img_paths[idx]
@@ -44,21 +44,7 @@ class TextImagePathDataset(Dataset):
         with torch.no_grad():
             outputs = self.img_model(**img_inputs)
             last_hidden_states = outputs.last_hidden_state
-            img_cls_features = last_hidden_states[:, 0, :]
-            img_embedding = self.linear1(img_cls_features)
-
+            img_embedding = last_hidden_states[:, 0, :]
+            # img_embedding = self.linear1(img_embedding)
 
         return text_embedding, img_embedding
-    
-texts = ["This is a test", "This is another test", "This is the final test"]
-image_paths = [["/home/zuoxy/ceph_old/navcon_video/rxr_clips/000000/000000.png","/home/zuoxy/ceph_old/navcon_video/rxr_clips/000000/000001.png"],
-               ["/home/zuoxy/ceph_old/navcon_video/rxr_clips/000000/000002.png","/home/zuoxy/ceph_old/navcon_video/rxr_clips/000000/000003.png"]]
-
-dataset = TextImagePathDataset(image_paths, texts)
-data_loader = DataLoader(dataset, batch_size=2, shuffle=True)
-
-for text_embed, image_embed in data_loader:
-    print("Text Embeddings:", text_embed.shape)  # Should print [batch_size, 512]
-    print("Image Embeddings:", image_embed.shape)  # Should print [batch_size, 512]
-    similarity = torch.nn.functional.cosine_similarity(text_embed, image_embed, dim=1)
-    print("Similarity Scores:", similarity)  # Outputs similarity scores between text and image embeddings for each pair in the batch

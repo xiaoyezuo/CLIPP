@@ -8,9 +8,9 @@ import json
 import gzip
 
 from lib.pose_extractor import PoseExtractor
-from lib.image_extractor import ImageExtractor
+from lib.frame_extractor import ImageExtractor
 from lib.text_extractor import TextExtractor
-from lib.input_data import InputData
+from lib.dataset import TextImagePathDataset
 
 
 class BaseExtractor(PoseExtractor, ImageExtractor, TextExtractor):
@@ -36,6 +36,6 @@ class BaseExtractor(PoseExtractor, ImageExtractor, TextExtractor):
         path = self.get_path(self.generic_path_, subguide)
         poses = self.interpolate(path)
 
-        return InputData(image, text, path)
+        return TextImagePathDataset(image, text, path)
 
 

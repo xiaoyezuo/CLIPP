@@ -42,3 +42,4 @@ linear = torch.nn.Linear(features.size(1),
 # Apply the linear layer to get reduced feat
 embedding = linear(features)
 
+
