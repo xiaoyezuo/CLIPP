@@ -42,7 +42,8 @@ def main(path):
         rgb = im.get_image( subguide )
         print("rgb: ", len(rgb))
         print_images(rgb)
-        break
+        
+        
 
 if __name__ == "__main__":
 

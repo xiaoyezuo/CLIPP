@@ -30,19 +30,26 @@ class ImageExtractor:
         x_diff = pose1[0] - pose2[0]
         y_diff = pose1[1] - pose2[1]
         heading = np.arctan2(y_diff, x_diff)
-        
+        #print(heading)
+        if heading < 0:
+            heading += 2*np.pi
+        print(heading)
         # convert to habitats convention
         if heading <= (np.pi/2):
-            heading_habitat_frame = np.pi/2 - heading
+            print('1')
+            heading_habitat_frame = np.pi/2 - heading + np.pi
         elif heading > (np.pi/2) and heading <= np.pi:
-            heading_habitat_frame = (3*np.pi)/2 + (np.pi/2)-heading-(np.pi/2)
+            print('2')
+            heading_habitat_frame = (3*np.pi)/2 + (np.pi/2)-heading-(np.pi/2) + np.pi
         elif heading > np.pi and heading <= (3*np.pi)/2:
+            print('3')
             heading_habitat_frame = np.pi + ((3*np.pi/2) - heading)
         else:
-            heading_habitat_frame = np.pi/2 + (2*np.pi - heading)
+            print('4')
+            heading_habitat_frame = np.pi/2 + (2*np.pi - heading) + np.pi
 
         # make a rotation matrix
-        rot = Rotation.from_euler('z', [heading_habitat_frame])
+        rot = Rotation.from_euler('z', [heading_habitat_frame+(np.pi/2)])
         
         return rot.as_matrix() 
 
@@ -59,6 +66,7 @@ class ImageExtractor:
         # you have n roations and poses where n is the number of waypoints
         # use the poses to calculate yaw
         for i in range(path_len-1):
+            
             rotations[i] = self.calculate_rotation(poses[i], poses[i+1])
 
         rgb = list()
