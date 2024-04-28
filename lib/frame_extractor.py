@@ -8,6 +8,7 @@ import numpy as np
 from scipy.spatial.transform import Rotation
 from lib.matcher import Matcher
 from lib.habitat_wrapper import HabitatWrapper
+import quaternion
 
 class ImageExtractor:
 
@@ -18,7 +19,7 @@ class ImageExtractor:
 
     def get_pose_trace(self, instr_id):
         data_path = self.file_path_ + \
-            "pose_traces/rxr_train/{:06}_guide_pose_trace.npz".format(instr_id)
+            "pose_traces/rxr_train/{:06}_guide_pose_trace.npz".format(int(instr_id))
         pose_trace = np.load(data_path)
         
         return pose_trace
@@ -43,41 +44,44 @@ class ImageExtractor:
         # make a rotation matrix
         rot = Rotation.from_euler('z', heading_habitat_frame)
         
-        return rot 
+        return rot.as_matrix() 
 
-    def get_frames_from_sim(self, extrinsics, instruction_ids):
+    def get_frames_from_sim(self, extrinsics, pano):
         # get unique extrinsics
-        self.matcher_.match(instruction_ids)
+        self.matcher_.match(pano)
         pose_matrices = self.matcher_.poses_from_match(extrinsics)
-
+        print(pose_matrices.shape)
         # parse rotations and poses
-        rotations = pose_matrices[:3,:3,:]
-        poses = pose_matrices[:3,-1,:]
+        rotations = pose_matrices[:,:3,:3]
+        poses = pose_matrices[:,:-1,-1]
 
         # you have n roations and poses where n is the number of waypoints
         # use the poses to calculate yaw
         for i in range(len(poses)-1):
             rotations[i] = self.calculate_rotation(poses[i], poses[i+1])
 
-        rgb = np.empty(self.sim.camera_res_.append(len(poses)))
-        sem = np.empty(self.sim.camera_res_.append(len(poses)))
+        rgb = list()
+        sem = list()
 
-        for i in range(len(poses)):
+        for i in range(poses.shape[1]):
+            #print(poses[i])
+            #print(rotations[i])
+
             transform = self.sim_.place_agent(rotations[i], poses[i])
-            rgb[i] = self.sim_.get_sensor_observations()["rgba_camera"]
-            sem[i] = self.sim_.get_sensor_observations()["semantic_camera"]
+            rgb.append(self.sim_.get_sensor_obs("rgba_camera"))
+            sem.append(self.sim_.get_sensor_obs("semantic_camera"))
         
         return rgb, sem
             
     def get_image(self, subguide, return_sem=False):
-        instr_id = str(subguide['instruction_id'])
+        instr_id = subguide['instruction_id']
         scene_id = str(subguide['scan'])
         
         self.sim_.update_sim(scene_id)
 
         pose_trace = self.get_pose_trace(instr_id)
-
-        rgb, sem = self.get_frames_from_sim(pose_trace["extrinsics"], instr_id)
+        
+        rgb, sem = self.get_frames_from_sim(pose_trace["extrinsic_matrix"], pose_trace["pano"])
 
         if return_sem:
             return rgb, sem

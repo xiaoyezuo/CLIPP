@@ -37,6 +37,9 @@ class HabitatWrapper:
         else:
             self.prev_scene_id_ = scene_id
         print("finished updating sim")
+
+    def get_sensor_obs(self, uuid):
+        return self.sim_.get_sensor_observations()[uuid]
     
     def make_config(self, scene_id):
         scene_file = self.file_path_ + "../data/mp3d/%s/%s.glb" %(scene_id, scene_id)

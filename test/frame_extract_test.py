@@ -19,12 +19,14 @@ def main(path):
 
     with gzip.open(path+"rxr_train_guide.jsonl.gz") as f:
         print("found file %s, loading..." %path)
-        guide = [json.loads(line) for line in f]
+        for line in f:
+            guide = [json.loads(line)]
+            break
 
     for subguide in guide:
         print(subguide)
         rgb = im.get_image( subguide )
-        print("rgb: ", rgb)
+        print("rgb: ", len(rgb))
         break
 
 if __name__ == "__main__":
