@@ -1,6 +1,6 @@
 FROM continuumio/miniconda3:latest AS miniconda
-
-FROM nvidia/cuda:12.1.1-cudnn8-devel-ubuntu22.04
+FROM nvidia/cudagl:11.4.2-base-ubuntu20.04
+#FROM nvidia/cuda:12.1.1-cudnn8-devel-ubuntu22.04
 
 ARG DEBIAN_FRONTEND=noninteractive
 
@@ -11,8 +11,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends python3-pip git
 RUN apt-get install -y --no-install-recommends libjsoncpp-dev libepoxy-dev libglm-dev libosmesa6 libosmesa6-dev libglew-dev libopencv-dev
 
 # torch install
-RUN pip3 install torch torchvision torchaudio -f https://download.pytorch.org/whl/cu111/torch_stable.html
-RUN pip3 install jupyterlab notebook
+#RUN pip3 install torch torchvision torchaudio -f https://download.pytorch.org/whl/cu111/torch_stable.html
+#RUN pip3 install jupyterlab notebook
 
 # Add user
 ARG GID=1000

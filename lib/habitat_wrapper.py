@@ -13,9 +13,13 @@ class HabitatWrapper:
     def __init__(self, file_path):
 
         self.sim_ = None
+        self.prev_scene_id_ = None
+        self.file_path_ = file_path
+        self.camera_res_ = [240, 320]
 
     def __del__(self):
-        self.sim_.close()
+        if not isinstance(None, type(None)):
+            self.sim_.close()
 
     def place_agent(self, rotation, pose):
         state = habitat_sim.AgentState()
@@ -24,38 +28,50 @@ class HabitatWrapper:
         self.sim_.agents[0].set_state(state)
 
         return self.sim_.agents[0].scene_node.transformation_matrix()
+ 
+    def update_sim(self, scene_id):
+        print("updating sim")
+        if scene_id != self.prev_scene_id_:
+            self.prev_scene_id_ = scene_id
+            self.sim_ = habitat_sim.Simulator(self.make_config(scene_id))
+        else:
+            self.prev_scene_id_ = scene_id
+        print("finished updating sim")
     
-    def make_config(self, generic_path, scene_id):
-        scene_file = generic_path + "/data/mp3d/%s/%s.glb" %(scene_id, scene_id)
+    def make_config(self, scene_id):
+        scene_file = self.file_path_ + "../data/mp3d/%s/%s.glb" %(scene_id, scene_id)
 
         backend_cfg = habitat_sim.SimulatorConfiguration()
         backend_cfg.scene_id = scene_file
 
+        backend_cfg.scene_dataset_config_file = self.file_path_+"../data/mp3d/mp3d.scene_dataset_config.json"
+        #backend_cfg.enable_physics = True
+        
         camera_resolution = [240, 320]
         sensors = {
             "rgba_camera": {
                 "sensor_type": habitat_sim.SensorType.COLOR,
                 "resolution": camera_resolution,
-                "position": [0.0, 0.0, 0.0],  # ::: fix y to be 0 later
+                "position": [0.0, 1.0, 0.0],  # ::: fix y to be 0 later
             },
-            "semantic_camera": {
+                "semantic_camera": {
                 "sensor_type": habitat_sim.SensorType.SEMANTIC,
                 "resolution": camera_resolution,
-                "position": [0.0, 0.0, 0.0],
+                "position": [0.0, 1.0, 0.0],
             },
         }
 
         sensor_specs = []
         for sensor_uuid, sensor_params in sensors.items():
-            sensor_spec = habitat_sim.SensorSpec()
+            sensor_spec = habitat_sim.CameraSensorSpec()
             sensor_spec.uuid = sensor_uuid
             sensor_spec.sensor_type = sensor_params["sensor_type"]
             sensor_spec.resolution = sensor_params["resolution"]
             sensor_spec.position = sensor_params["position"]
             sensor_specs.append(sensor_spec)
-
+        
         # agent configuration
         agent_cfg = habitat_sim.agent.AgentConfiguration()
         agent_cfg.sensor_specifications = sensor_specs
-
+        
         return habitat_sim.Configuration(backend_cfg, [agent_cfg])
