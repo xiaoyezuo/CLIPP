@@ -55,12 +55,12 @@ class HabitatWrapper:
             "rgba_camera": {
                 "sensor_type": habitat_sim.SensorType.COLOR,
                 "resolution": camera_resolution,
-                "position": [0.0, 1.0, 0.0],  # ::: fix y to be 0 later
+                "position": [0.0, 0.0, 0.0],  # ::: fix y to be 0 later
             },
                 "semantic_camera": {
                 "sensor_type": habitat_sim.SensorType.SEMANTIC,
                 "resolution": camera_resolution,
-                "position": [0.0, 1.0, 0.0],
+                "position": [0.0, 0.0, 0.0],
             },
         }
 

@@ -42,7 +42,7 @@ class ImageExtractor:
             heading_habitat_frame = np.pi/2 + (2*np.pi - heading)
 
         # make a rotation matrix
-        rot = Rotation.from_euler('z', heading_habitat_frame)
+        rot = Rotation.from_euler('z', [heading_habitat_frame])
         
         return rot.as_matrix() 
 
@@ -50,20 +50,21 @@ class ImageExtractor:
         # get unique extrinsics
         self.matcher_.match(pano)
         pose_matrices = self.matcher_.poses_from_match(extrinsics)
-        print(pose_matrices.shape)
+        path_len = pose_matrices.shape[0]
+        #print(pose_matrices[0].shape)
         # parse rotations and poses
         rotations = pose_matrices[:,:3,:3]
         poses = pose_matrices[:,:-1,-1]
 
         # you have n roations and poses where n is the number of waypoints
         # use the poses to calculate yaw
-        for i in range(len(poses)-1):
+        for i in range(path_len-1):
             rotations[i] = self.calculate_rotation(poses[i], poses[i+1])
 
         rgb = list()
         sem = list()
 
-        for i in range(poses.shape[1]):
+        for i in range(path_len):
             #print(poses[i])
             #print(rotations[i])
 
