@@ -6,21 +6,23 @@
 
 import numpy as np
 from scipy.spatial.transform import Rotation
-from lib.matcher import Matcher
+from utils.matcher import Matcher
 from lib.habitat_wrapper import HabitatWrapper
+import quaternion
 
 class ImageExtractor:
 
     def __init__(self, file_path):
         self.matcher_ = Matcher()
-        self.sim_wrapper_ = HabitatWrapper(file_path)
+        self.sim_ = HabitatWrapper(file_path)
         self.file_path_ = file_path
 
-    def get_pose_trace(self, generic_path, subguide):
-        instr_id = str(subguide['instruction_id'])
+    def get_pose_trace(self, instr_id):
         data_path = self.file_path_ + \
-            "pose_traces/rxr_train/{:06}_guide_pose_trace.npz".format(instr_id)
+            "pose_traces/rxr_train/{:06}_guide_pose_trace.npz".format(int(instr_id))
         pose_trace = np.load(data_path)
+        
+        return pose_trace
 
     def calculate_rotation(self, pose1, pose2):
         # y is zero, angle increases looking right, z is up
@@ -28,39 +30,67 @@ class ImageExtractor:
         x_diff = pose1[0] - pose2[0]
         y_diff = pose1[1] - pose2[1]
         heading = np.arctan2(y_diff, x_diff)
+        #print(heading)
+        if heading < 0:
+            # make it positive
+            heading += 2*np.pi
         
         # convert to habitats convention
         if heading <= (np.pi/2):
-            heading_habitat_frame = np.pi/2 - heading
+            heading_habitat_frame = np.pi/2 - heading + np.pi
         elif heading > (np.pi/2) and heading <= np.pi:
-            heading_habitat_frame = (3*np.pi)/2 + (np.pi/2)-heading-(np.pi/2)
+            heading_habitat_frame = (3*np.pi)/2 + (np.pi/2)-heading-(np.pi/2) + np.pi
         elif heading > np.pi and heading <= (3*np.pi)/2:
             heading_habitat_frame = np.pi + ((3*np.pi/2) - heading)
         else:
-            heading_habitat_frame = np.pi/2 + (2*np.pi - heading)
+            heading_habitat_frame = np.pi/2 + (2*np.pi - heading) + np.pi
 
         # make a rotation matrix
-        rot = Rotation.from_euler('z', heading_habitat_frame)
+        rot = Rotation.from_euler('z', [heading_habitat_frame+(np.pi/2)])
         
-        return rot 
+        return rot.as_matrix() 
 
-
-    def get_frame_from_sim(self, extrinsics, instruction_ids):
+    def get_frames_from_sim(self, extrinsics, pano):
         # get unique extrinsics
-        self.matcher_.match(instruction_ids)
+        self.matcher_.match(pano)
         pose_matrices = self.matcher_.poses_from_match(extrinsics)
-
+        path_len = pose_matrices.shape[0]
+        #print(pose_matrices[0].shape)
         # parse rotations and poses
-        rotations = pose_matrices[:3,:3,:]
-        poses = pose_matrices[:3,-1,:]
+        rotations = pose_matrices[:,:3,:3]
+        poses = pose_matrices[:,:-1,-1]
 
         # you have n roations and poses where n is the number of waypoints
         # use the poses to calculate yaw
+        for i in range(path_len-1):
+            
+            rotations[i] = self.calculate_rotation(poses[i], poses[i+1])
 
+        rgb = list()
+        sem = list()
 
-    def get_image(self, generic_path, subguide):
-        instr_id = str(subguide['instruction_id'])
-        scene_id = str(subguide['scene_id'])
+        for i in range(path_len):
+            #print(poses[i])
+            #print(rotations[i])
 
+            transform = self.sim_.place_agent(rotations[i], poses[i])
+            rgb.append(self.sim_.get_sensor_obs("rgba_camera"))
+            sem.append(self.sim_.get_sensor_obs("semantic_camera"))
+        
+        return rgb, sem
+            
+    def get_images(self, subguide, return_sem=False):
+        instr_id = subguide['instruction_id']
+        scene_id = str(subguide['scan'])
+        
+        self.sim_.update_sim(scene_id)
 
+        pose_trace = self.get_pose_trace(instr_id)
+        
+        rgb, sem = self.get_frames_from_sim(pose_trace["extrinsic_matrix"], pose_trace["pano"])
+
+        if return_sem:
+            return rgb, sem
+        else:
+            return rgb
 

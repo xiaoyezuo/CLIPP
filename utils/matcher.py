@@ -4,6 +4,8 @@
     April 2024
 """
 
+import numpy as np
+
 class Matcher:
 
     def __init__(self):

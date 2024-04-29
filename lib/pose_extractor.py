@@ -7,6 +7,7 @@
 import numpy as np
 import gzip
 import json
+#from utils.matcher import Matcher
 
 class Matcher:
 
@@ -65,16 +66,15 @@ class Interpolator:
 
 class PoseExtractor:
 
-    def __init__(self, path=".", out_dim=96):
-
+    def __init__(self, path, out_dim=96):
         self.pose_ = None
         self.train_guide_ = list()
-        self.generic_path_ = path.split("rxr_train")[0]
+        self.generic_path_ = path
 
         self.matcher_ = Matcher()
         self.interpolator_ = Interpolator(out_dim)
 
-        self.load(path)
+        #self.load(path)
 
     def interpolate(self, path):
         return self.interpolator_.interpolate(path)
@@ -97,10 +97,10 @@ class PoseExtractor:
         unique_poses = self.matcher_.poses_from_match(poses)
         return unique_poses
 
-    def get_path(self, generic_path, subguide):
+    def get_path(self, subguide):
         inst_id = subguide['instruction_id']
-        pose_path = generic_path+ \
-            "pose_traces/rxr_train/{:06}_guide_pose_trace.npz".format(instruction_id)
+        pose_path = self.generic_path_+ \
+            "pose_traces/rxr_train/{:06}_guide_pose_trace.npz".format(inst_id)
 
         return self.get_path_poses(pose_path)
 
