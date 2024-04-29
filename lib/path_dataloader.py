@@ -8,7 +8,6 @@ import torch
 from torch.utils.data import Dataset
 from lib.pose_extractor import PoseExtractor
 
-
 class PathDataLoader(Dataset, PoseExtractor):
 
     def __init__(self, path, interpolate=True, out_dim=96):

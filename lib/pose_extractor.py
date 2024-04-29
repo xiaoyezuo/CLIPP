@@ -65,7 +65,7 @@ class Interpolator:
 
 class PoseExtractor:
 
-    def __init__(self, path, out_dim=96):
+    def __init__(self, path=".", out_dim=96):
 
         self.pose_ = None
         self.train_guide_ = list()
@@ -75,14 +75,6 @@ class PoseExtractor:
         self.interpolator_ = Interpolator(out_dim)
 
         self.load(path)
-
-    @property
-    def pose(self):
-        return self.pose_
-
-    @pose.setter
-    def pose(self, p):
-        self.pose_ = p
 
     def interpolate(self, path):
         return self.interpolator_.interpolate(path)
@@ -105,6 +97,12 @@ class PoseExtractor:
         unique_poses = self.matcher_.poses_from_match(poses)
         return unique_poses
 
+    def get_path(self, generic_path, subguide):
+        inst_id = subguide['instruction_id']
+        pose_path = generic_path+ \
+            "pose_traces/rxr_train/{:06}_guide_pose_trace.npz".format(instruction_id)
+
+        return self.get_path_poses(pose_path)
 
     def path_from_guide(self, idx):
         # here we can get the path of UIDs from the train guide
