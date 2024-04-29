@@ -11,7 +11,6 @@ class VLADataLoader(Dataset):
 
     def __init__(self, file_path):
         super().__init__()
-        print("getting base")
         self.be = BaseExtractor(file_path)
 
     def __len__(self):
