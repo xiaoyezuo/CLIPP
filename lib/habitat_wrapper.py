@@ -30,13 +30,13 @@ class HabitatWrapper:
         return self.sim_.agents[0].scene_node.transformation_matrix()
  
     def update_sim(self, scene_id):
-        print("updating sim")
+        print("[SIM WRAPPER] Updating sim")
         if scene_id != self.prev_scene_id_:
             self.prev_scene_id_ = scene_id
             self.sim_ = habitat_sim.Simulator(self.make_config(scene_id))
         else:
             self.prev_scene_id_ = scene_id
-        print("finished updating sim")
+        print("[SIM WRAPPER] Finished updating")
 
     def get_sensor_obs(self, uuid):
         return self.sim_.get_sensor_observations()[uuid]
@@ -48,7 +48,6 @@ class HabitatWrapper:
         backend_cfg.scene_id = scene_file
 
         backend_cfg.scene_dataset_config_file = self.file_path_+"../data/mp3d/mp3d.scene_dataset_config.json"
-        #backend_cfg.enable_physics = True
         
         camera_resolution = [240, 320]
         sensors = {

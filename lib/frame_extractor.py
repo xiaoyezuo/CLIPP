@@ -6,7 +6,7 @@
 
 import numpy as np
 from scipy.spatial.transform import Rotation
-from lib.matcher import Matcher
+from utils.matcher import Matcher
 from lib.habitat_wrapper import HabitatWrapper
 import quaternion
 
@@ -32,20 +32,17 @@ class ImageExtractor:
         heading = np.arctan2(y_diff, x_diff)
         #print(heading)
         if heading < 0:
+            # make it positive
             heading += 2*np.pi
-        print(heading)
+        
         # convert to habitats convention
         if heading <= (np.pi/2):
-            print('1')
             heading_habitat_frame = np.pi/2 - heading + np.pi
         elif heading > (np.pi/2) and heading <= np.pi:
-            print('2')
             heading_habitat_frame = (3*np.pi)/2 + (np.pi/2)-heading-(np.pi/2) + np.pi
         elif heading > np.pi and heading <= (3*np.pi)/2:
-            print('3')
             heading_habitat_frame = np.pi + ((3*np.pi/2) - heading)
         else:
-            print('4')
             heading_habitat_frame = np.pi/2 + (2*np.pi - heading) + np.pi
 
         # make a rotation matrix
@@ -82,7 +79,7 @@ class ImageExtractor:
         
         return rgb, sem
             
-    def get_image(self, subguide, return_sem=False):
+    def get_images(self, subguide, return_sem=False):
         instr_id = subguide['instruction_id']
         scene_id = str(subguide['scan'])
         
