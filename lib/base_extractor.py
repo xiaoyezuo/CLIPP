@@ -10,8 +10,6 @@ import gzip
 from lib.pose_extractor import PoseExtractor
 from lib.frame_extractor import ImageExtractor
 from lib.text_extractor import TextExtractor
-from lib.input_data import InputData
-
 
 class BaseExtractor(PoseExtractor, ImageExtractor, TextExtractor):
 
@@ -43,5 +41,6 @@ class BaseExtractor(PoseExtractor, ImageExtractor, TextExtractor):
         poses = self.interpolate(path)
 
         return InputData(image, text, poses)
+
 
 
