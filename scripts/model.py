@@ -9,7 +9,7 @@ class CLIPP(nn.Module):
         super(CLIPP, self).__init__()
         self.fc1 = nn.Linear(input_dim, output_dim)
         self.fc2 = nn.Linear(input_dim, output_dim)
-        self.logit_scale = nn.Parameter(torch.ones([]) * np.log(1 / 0.07))#TODO:learned temperature parameter??
+        self.logit_scale = nn.Parameter(torch.ones([]) * np.log(1 / 0.07))#learned temperature parameter
 
     def forward(self, text_embed, image_embed, path_embed):
 
