@@ -9,9 +9,8 @@ from scipy.spatial.transform import Rotation
 from PIL import Image
 import gzip, json
 
-project_dir = "/home/zuoxy/VLA-Nav/"
-if project_dir not in sys.path:
-    sys.path.append(project_dir)
+PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__),os.pardir))
+sys.path.append(PROJECT_ROOT)
 
 from utils.matcher import Matcher
 
@@ -91,9 +90,9 @@ def extract(instr_id, input_dir, output_dir):
     for idx in uids:
         if not os.path.exists(input_dir+"{:06}/".format(int(instr_id))+"{:06}".format(idx)+".png"):
             continue
-        # img = Image.open(input_dir+"{:06}/".format(int(instr_id))+"{:06}".format(idx)+".png")
-        # filepath = output_dir + "{:06}/".format(int(instr_id)) + f"{count:06d}.png"
-        # img.save(filepath)
+        img = Image.open(input_dir+"{:06}/".format(int(instr_id))+"{:06}".format(idx)+".png")
+        filepath = output_dir + "{:06}/".format(int(instr_id)) + f"{count:06d}.png"
+        img.save(filepath)
         pose_[count] = pose['extrinsic_matrix'][idx][:3, 3].tolist()
         pose_sequence.append(pose['extrinsic_matrix'][idx][:3, 3].tolist())
         count += 1
@@ -101,8 +100,8 @@ def extract(instr_id, input_dir, output_dir):
 
 pose_all = {}
 pose_seq_all = {}
-pose_path = "/home/zuoxy/VLA-Nav/data/pose/pose.json"
-pos_seq_path = "/home/zuoxy/VLA-Nav/data/pose/pose_seq.json"
+pose_path = PROJECT_ROOT+"/data/pose/pose.json"
+pos_seq_path = PROJECT_ROOT+"/data/pose/pose_seq.json"
 rxr_guide_path =  "/home/zuoxy/ceph_old/rxr-data/rxr_train_guide.jsonl.gz"
 
 with gzip.open(rxr_guide_path, 'r') as f:
