@@ -1,9 +1,0 @@
-[submodule "CLIP-ViL"]
-	path = CLIP-ViL
-	url = https://github.com/jhughes50/CLIP-ViL
-[submodule "Matterport3DSimulator"]
-	path = Matterport3DSimulator
-	url = https://github.com/peteanderson80/Matterport3DSimulator
-[submodule "habitat-sim"]
-	path = habitat-sim
-	url = https://github.com/facebookresearch/habitat-sim
